@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-export interface Contact {
+interface Contact {
   id: string;
   name: string;
   email: string;
@@ -22,7 +22,7 @@ const contactSlice = createSlice({
     addContact: (state, action: PayloadAction<Contact>) => {
       state.list.push(action.payload);
     },
-    deleteContact: (state, action: PayloadAction<String>) => {
+    deleteContact: (state, action: PayloadAction<string>) => {
       state.list = state.list.filter((contact) => contact.id !== action.payload);
     },
   },

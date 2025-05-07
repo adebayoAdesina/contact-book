@@ -1,19 +1,31 @@
 import * as Yup from "yup";
 import { useDispatch } from "react-redux";
-import { addContact, type Contact } from "../store/contactSlice";
+import { addContact } from "../store/contactSlice";
 import { Button } from "./ui/button";
 import { useFormik } from "formik";
 import { v4 as uuidv4 } from "uuid";
 
+/**
+ * Validation schema for the contact form using Yup.
+ * Ensures that the name, email, and phone fields are required and valid.
+ */
 const ContactFormSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   phone: Yup.string().required("Phone is required"),
 });
 
+/**
+ * The ContactForm component.
+ * This component handles the form for adding a new contact.
+ */
 const ContactForm: React.FC = () => {
   const dispatch = useDispatch();
 
+  /**
+   * Formik configuration for handling form submission and validation.
+   * Initializes form values, sets up validation schema, and defines the submit handler.
+   */
   const formik = useFormik({
     initialValues: {
       name: "",
