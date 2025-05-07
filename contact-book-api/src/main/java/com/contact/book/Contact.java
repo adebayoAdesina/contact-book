@@ -1,9 +1,15 @@
 package com.contact.book;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 
 @Entity
 public class Contact {
@@ -15,7 +21,7 @@ public class Contact {
     private String email;
     private String phone;
 
-    // Getters and Setters
+
     public Long getId() {
         return id;
     }
