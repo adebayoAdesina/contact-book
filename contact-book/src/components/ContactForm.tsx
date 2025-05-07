@@ -1,9 +1,10 @@
+import Swal from "sweetalert2";
 import * as Yup from "yup";
-import { useDispatch } from "react-redux";
-import { addContact } from "../store/contactSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { Button } from "./ui/button";
 import { useFormik } from "formik";
-import { v4 as uuidv4 } from "uuid";
+import { contactApi } from "@/api/ContactApi";
+import { clearEditContent } from "@/store/contactSlice";
 
 /**
  * Validation schema for the contact form using Yup.
@@ -21,32 +22,74 @@ const ContactFormSchema = Yup.object().shape({
  */
 const ContactForm: React.FC = () => {
   const dispatch = useDispatch();
+  const edit = useSelector(
+    (state: { contacts: { editList: any } }) => state.contacts.editList
+  );
+  console.log(edit);
 
   /**
    * Formik configuration for handling form submission and validation.
    * Initializes form values, sets up validation schema, and defines the submit handler.
    */
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      name: "",
-      email: "",
-      phone: "",
+      name: edit?.name || "",
+      email: edit?.email || "",
+      phone: edit?.phone || "",
     },
     validationSchema: ContactFormSchema,
-    onSubmit: (values, { resetForm }) => {
-      const contactWithId = {
-        ...values,
-        id: uuidv4(), // or Date.now() if you prefer
-      };
-
-      dispatch(addContact(contactWithId));
-      resetForm();
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        if (edit) {
+          await contactApi.editContact({
+            id: edit.id,
+            name: values.name,
+            email: values.email,
+            phone: values.phone,
+          });
+          await contactApi.getContacts(dispatch);
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Edit successfully",
+          });
+          resetForm();
+        } else {
+          await contactApi.postContact(values);
+          await contactApi.getContacts(dispatch);
+          Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Contact added",
+          });
+          resetForm();
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: error || "An error occur",
+          text: "Something went wrong!",
+        });
+      }
     },
   });
 
   return (
     <div className="max-w-md mx-auto p-4 glassmorphism rounded-lg shadow-md text-white">
-      <h2 className="text-2xl font-bold mb-4">Add Contact</h2>
+      {edit?.id ? (
+        <div className="flex justify-between">
+          <h2 className="text-2xl font-bold mb-4">Edit Contact</h2>
+          <button
+            onClick={() => dispatch(clearEditContent())}
+            className="bg-white text-black px-2 py-1 w-10 h-10 rounded-full"
+          >
+            X
+          </button>
+        </div>
+      ) : (
+        <h2 className="text-2xl font-bold mb-4">Add Contact</h2>
+      )}
       <form onSubmit={formik.handleSubmit}>
         <div className="mb-4">
           <label htmlFor="name" className="block font-bold mb-2">
@@ -60,7 +103,7 @@ const ContactForm: React.FC = () => {
             onChange={formik.handleChange}
             className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
           />
-          {formik.touched.name && formik.errors.name && (
+          {formik.touched.name && typeof formik.errors.name === "string" && (
             <div className="text-red-500">{formik.errors.name}</div>
           )}
         </div>
@@ -76,7 +119,7 @@ const ContactForm: React.FC = () => {
             onChange={formik.handleChange}
             className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
           />
-          {formik.touched.email && formik.errors.email && (
+          {formik.touched.email && typeof formik.errors.email === "string" && (
             <div className="text-red-500">{formik.errors.email}</div>
           )}
         </div>
@@ -92,7 +135,7 @@ const ContactForm: React.FC = () => {
             onChange={formik.handleChange}
             className="shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
           />
-          {formik.touched.phone && formik.errors.phone && (
+          {formik.touched.phone && typeof formik.errors.phone === "string" && (
             <div className="text-red-500">{formik.errors.phone}</div>
           )}
         </div>

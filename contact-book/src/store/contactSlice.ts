@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 interface Contact {
   id: string;
@@ -9,24 +9,30 @@ interface Contact {
 
 interface ContactState {
   list: Contact[];
+  editList: Contact | null;
 }
 
 const initialState: ContactState = {
   list: [],
+  editList: null,
 };
 
 const contactSlice = createSlice({
-  name: 'contacts',
+  name: "contacts",
   initialState,
   reducers: {
-    addContact: (state, action: PayloadAction<Contact>) => {
-      state.list.push(action.payload);
+    addContact: (state, action: PayloadAction<Contact[]>) => {
+      state.list = action.payload;
     },
-    deleteContact: (state, action: PayloadAction<string>) => {
-      state.list = state.list.filter((contact) => contact.id !== action.payload);
+    editContact: (state, action: PayloadAction<Contact>) => {
+      state.editList = action.payload;
+    },
+    clearEditContent: (state) => {
+      state.editList = null;
     },
   },
 });
 
-export const { addContact, deleteContact } = contactSlice.actions;
+export const { addContact, clearEditContent, editContact } =
+  contactSlice.actions;
 export default contactSlice.reducer;
